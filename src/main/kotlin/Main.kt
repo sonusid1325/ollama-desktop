@@ -53,10 +53,6 @@ fun main() = application {
         val window = this.window
         var offset by remember { mutableStateOf(Point(0, 0)) }
 
-        LaunchedEffect(Unit) {
-            window.minimumSize = Dimension(600, 400)
-        }
-
         AppTheme {
             Column(modifier = Modifier.fillMaxSize()) {
                 // Custom Title Bar

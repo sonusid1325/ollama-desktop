@@ -18,7 +18,7 @@ import androidx.compose.ui.unit.dp
 @Composable
 fun ChatBubble(text: String, isSend: Boolean) {
     Row(
-        modifier = Modifier.fillMaxWidth().padding(10.dp).widthIn(max = 50.dp),
+        modifier = Modifier.fillMaxWidth().padding(10.dp),
         horizontalArrangement = if (isSend) Arrangement.End else Arrangement.Start
     ) {
         Text(
@@ -28,6 +28,7 @@ fun ChatBubble(text: String, isSend: Boolean) {
                 .clip(RoundedCornerShape(12.dp))
                 .background(MaterialTheme.colorScheme.primary)
                 .padding(12.dp)
+                .widthIn(max = 300.dp)
         )
     }
 }
