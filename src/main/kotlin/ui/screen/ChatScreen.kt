@@ -27,9 +27,12 @@ import java.net.URL
 @Composable
 fun ChatScreen() {
     val logo = "drawable/logo.svg"
+    var selectedModel by remember { mutableStateOf<String?>(null) }
     var prompt by remember { mutableStateOf("") }
     var messages by remember { mutableStateOf(listOf<String>()) }
     val scope = rememberCoroutineScope()
+    var models by remember { mutableStateOf(listOf<String?>()) }
+    var showDialog by remember { mutableStateOf(false) }
 
     fun sendMessage() {
         if (prompt.isNotBlank()) {
@@ -38,9 +41,15 @@ fun ChatScreen() {
             prompt = ""
 
             scope.launch {
-                val response = generateResponse(userMessage)
+                val response = generateResponse(userMessage, model = selectedModel)
                 messages = messages + "Ollama: $response"
             }
+        }
+    }
+
+    LaunchedEffect(Unit) {
+        scope.launch {
+            models = getAvailableModels()
         }
     }
 
@@ -48,7 +57,7 @@ fun ChatScreen() {
         topBar = {
             TopAppBar(
                 navigationIcon = {
-                    IconButton(onClick = {}) {
+                    IconButton(onClick = { showDialog = true }) {
                         Icon(
                             painter = painterResource(logo),
                             contentDescription = "navigation",
@@ -83,7 +92,11 @@ fun ChatScreen() {
                     )
                 )
                 Spacer(Modifier.width(10.dp))
-                Button(onClick = { sendMessage() }, contentPadding = PaddingValues(0.dp), modifier = Modifier.size(50.dp)) {
+                Button(
+                    onClick = { sendMessage() },
+                    contentPadding = PaddingValues(0.dp),
+                    modifier = Modifier.size(50.dp)
+                ) {
                     Icon(Icons.Rounded.KeyboardArrowRight, "enter")
                 }
             }
@@ -105,27 +118,81 @@ fun ChatScreen() {
             }
         }
     }
+
+    if (showDialog) {
+        AlertDialog(
+            onDismissRequest = { showDialog = false },
+            title = { Text("Available Models") },
+            text = {
+                Column {
+                    models.forEach { model ->
+                        Button(modifier = Modifier.fillMaxWidth(), onClick = {
+                            selectedModel = model
+                            println(selectedModel)
+                            showDialog = false
+                        }) {
+                            if (model != null) {
+                                Text(model.toString())
+                            } else {
+                                Text("Error: Connection refused")
+                            }
+                        }
+                    }
+                }
+            },
+            confirmButton = {
+                Button(onClick = { showDialog = false }) {
+                    Text("OK")
+                }
+            }
+        )
+    }
 }
 
-
-suspend fun generateResponse(prompt: String): String {
+suspend fun getAvailableModels(): List<String?> {
     return withContext(Dispatchers.IO) {
         try {
-            val url = URL("http://localhost:11434/api/generate")
+            val url = URL("http://localhost:11434/api/tags")
             val connection = url.openConnection() as HttpURLConnection
-            connection.requestMethod = "POST"
-            connection.setRequestProperty("Content-Type", "application/json")
-            connection.doOutput = true
-
-            // Include the model and prompt in the JSON request body
-            val jsonInputString = """{"model": "qwen2.5-coder:0.5b", "prompt": "$prompt", "stream": false}"""
-            connection.outputStream.use { it.write(jsonInputString.toByteArray()) }
+            connection.requestMethod = "GET"
 
             val response = connection.inputStream.bufferedReader().readText()
             val jsonResponse = JSONObject(response)
-            jsonResponse.getString("response")
+            val modelsArray = jsonResponse.getJSONArray("models")
+
+            List(modelsArray.length()) { i ->
+                modelsArray.getJSONObject(i).getString("name")
+            }
         } catch (e: Exception) {
-            "Error: ${e.localizedMessage}"
+            println(e.localizedMessage)
+            listOf(null)
+        }
+    }
+}
+
+
+suspend fun generateResponse(prompt: String, model: String?): String {
+    return withContext(Dispatchers.IO) {
+        if(model==null){
+            "No Model is selected"
+        }else{
+            try {
+                val url = URL("http://localhost:11434/api/generate")
+                val connection = url.openConnection() as HttpURLConnection
+                connection.requestMethod = "POST"
+                connection.setRequestProperty("Content-Type", "application/json")
+                connection.doOutput = true
+
+                // Include the model and prompt in the JSON request body
+                val jsonInputString = """{"model": "$model", "prompt": "$prompt", "stream": false}"""
+                connection.outputStream.use { it.write(jsonInputString.toByteArray()) }
+
+                val response = connection.inputStream.bufferedReader().readText()
+                val jsonResponse = JSONObject(response)
+                jsonResponse.getString("response")
+            } catch (e: Exception) {
+                "Error: ${e.localizedMessage}"
+            }
         }
     }
 }
