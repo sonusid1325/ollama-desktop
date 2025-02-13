@@ -59,7 +59,7 @@ fun ChatScreen() {
             }
         }
     ) { paddingValues ->
-        if (dummyTexts.isEmpty()) {
+        if (messages.isEmpty()) {
             Column(
                 Modifier.padding(paddingValues).fillMaxSize(),
                 verticalArrangement = Arrangement.Center,
