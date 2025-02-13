@@ -1,0 +1,91 @@
+name: Build and Release Compose for Desktop App
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+  workflow_dispatch:  # Allows manual triggering
+
+jobs:
+  build-linux:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up JDK 21
+        uses: actions/setup-java@v3
+        with:
+          distribution: 'temurin'
+          java-version: '21'
+
+      - name: Grant execute permission for Gradle
+        run: chmod +x gradlew
+
+      - name: Build all Linux packages (Deb, Rpm, AppImage)
+        run: ./gradlew packageDistributionForCurrentOS
+
+      - name: Upload Linux builds
+        uses: actions/upload-artifact@v4
+        with:
+          name: Linux-Builds
+          path: build/compose/binaries/main/app/*
+
+  build-windows:
+    runs-on: windows-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up JDK 21
+        uses: actions/setup-java@v3
+        with:
+          distribution: 'temurin'
+          java-version: '21'
+
+      - name: Build Windows MSI
+        run: ./gradlew packageDistributionForCurrentOS
+
+      - name: Upload Windows build
+        uses: actions/upload-artifact@v4
+        with:
+          name: Windows-Build
+          path: build/compose/binaries/main/msi/*
+
+  release:
+    needs: [build-linux, build-windows]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Download Linux builds
+        uses: actions/download-artifact@v4
+        with:
+          name: Linux-Builds
+          path: artifacts/linux
+
+      - name: Download Windows build
+        uses: actions/download-artifact@v4
+        with:
+          name: Windows-Build
+          path: artifacts/windows
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: v1.0.${{ github.run_number }}
+          name: Release v1.0.${{ github.run_number }}
+          draft: false
+          prerelease: false
+          files: |
+            artifacts/linux/*
+            artifacts/windows/*
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
