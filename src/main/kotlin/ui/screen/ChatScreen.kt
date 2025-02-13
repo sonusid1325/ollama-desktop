@@ -50,55 +50,54 @@ fun ChatScreen() {
         }
     }
 
-    Scaffold(
-        topBar = {
-            TopAppBar(
-                navigationIcon = {
-                    IconButton(onClick = { showDialog = true }) {
-                        Icon(
-                            painter = painterResource(logo),
-                            contentDescription = "navigation",
-                            modifier = Modifier.size(30.dp)
-                        )
+    Scaffold(topBar = {
+        TopAppBar(
+            navigationIcon = {
+                IconButton(onClick = { showDialog = true }) {
+                    Icon(
+                        painter = painterResource(logo),
+                        contentDescription = "navigation",
+                        modifier = Modifier.size(30.dp)
+                    )
+                }
+            },
+            title = { Text("Ollama") },
+        )
+    }, bottomBar = {
+        Row(
+            Modifier.fillMaxWidth().padding(20.dp).padding(horizontal = 30.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            OutlinedTextField(
+                value = prompt,
+                onValueChange = { newText -> prompt = newText },
+                label = {
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Icon(painterResource(logo), logo, Modifier.size(30.dp))
+                        Spacer(Modifier.width(5.dp))
+                        Text("Ask Ollama")
                     }
                 },
-                title = { Text("Ollama") },
-            )
-        },
-        bottomBar = {
-            Row(
-                Modifier.fillMaxWidth().padding(20.dp).padding(horizontal = 30.dp),
-                verticalAlignment = Alignment.CenterVertically
+                shape = CircleShape,
+                singleLine = true,
+                modifier = Modifier.weight(1f),
+                keyboardOptions = KeyboardOptions.Default.copy(
+                    imeAction = ImeAction.Send
+                ),
+                keyboardActions = KeyboardActions(
+                    onSend = { sendMessage() }),
+                colors = OutlinedTextFieldDefaults.colors(
+                    unfocusedBorderColor = MaterialTheme.colorScheme.outline,
+                    focusedBorderColor = MaterialTheme.colorScheme.outline
+                ))
+            Spacer(Modifier.width(10.dp))
+            Button(
+                onClick = { sendMessage() }, contentPadding = PaddingValues(0.dp), modifier = Modifier.size(50.dp)
             ) {
-                OutlinedTextField(
-                    value = prompt,
-                    onValueChange = { newText -> prompt = newText },
-                    label = { Text("Enter Text") },
-                    shape = CircleShape,
-                    singleLine = true,
-                    modifier = Modifier.weight(1f),
-                    keyboardOptions = KeyboardOptions.Default.copy(
-                        imeAction = ImeAction.Send
-                    ),
-                    keyboardActions = KeyboardActions(
-                        onSend = { sendMessage() }
-                    ),
-                    colors = OutlinedTextFieldDefaults.colors(
-                        unfocusedBorderColor = MaterialTheme.colorScheme.outline,
-                        focusedBorderColor = MaterialTheme.colorScheme.outline
-                    )
-                )
-                Spacer(Modifier.width(10.dp))
-                Button(
-                    onClick = { sendMessage() },
-                    contentPadding = PaddingValues(0.dp),
-                    modifier = Modifier.size(50.dp)
-                ) {
-                    Icon(Icons.Rounded.KeyboardArrowRight, "enter")
-                }
+                Icon(Icons.Rounded.KeyboardArrowRight, "enter")
             }
         }
-    ) { paddingValues ->
+    }) { paddingValues ->
         if (messages.isEmpty()) {
             Column(
                 Modifier.padding(paddingValues).fillMaxSize(),
@@ -117,32 +116,27 @@ fun ChatScreen() {
     }
 
     if (showDialog) {
-        AlertDialog(
-            onDismissRequest = { showDialog = false },
-            title = { Text("Available Models") },
-            text = {
-                Column {
-                    models.forEach { model ->
-                        Button(modifier = Modifier.fillMaxWidth(), onClick = {
-                            selectedModel = model
-                            println(selectedModel)
-                            showDialog = false
-                        }) {
-                            if (model != null) {
-                                Text(model.toString())
-                            } else {
-                                Text("Error: Connection refused")
-                            }
+        AlertDialog(onDismissRequest = { showDialog = false }, title = { Text("Available Models") }, text = {
+            Column {
+                models.forEach { model ->
+                    Button(modifier = Modifier.fillMaxWidth(), onClick = {
+                        selectedModel = model
+                        println(selectedModel)
+                        showDialog = false
+                    }) {
+                        if (model != null) {
+                            Text(model.toString())
+                        } else {
+                            Text("Error: Connection refused")
                         }
                     }
                 }
-            },
-            confirmButton = {
-                Button(onClick = { showDialog = false }) {
-                    Text("OK")
-                }
             }
-        )
+        }, confirmButton = {
+            Button(onClick = { showDialog = false }) {
+                Text("OK")
+            }
+        })
     }
 }
 

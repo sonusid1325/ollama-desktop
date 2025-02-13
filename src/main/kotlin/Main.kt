@@ -48,7 +48,7 @@ fun main() = application {
     Window(
         onCloseRequest = ::exitApplication,
         undecorated = true, // Removes default title bar
-        resizable = true
+        resizable = false
     ) {
         val window = this.window
         var offset by remember { mutableStateOf(Point(0, 0)) }
