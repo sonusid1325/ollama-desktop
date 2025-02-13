@@ -19,6 +19,8 @@ dependencies {
     implementation(compose.desktop.currentOs)
     implementation(compose.material3)
     implementation(compose.materialIconsExtended)
+    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.6.4") // Coroutines for async API calls
+    implementation("org.json:json:20230227") // JSON parsing for API responses
 }
 
 compose.desktop {
