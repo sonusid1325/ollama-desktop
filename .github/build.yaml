@@ -1,0 +1,80 @@
+name: Build Compose for Desktop App
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+  workflow_dispatch:  # Allows manual triggering
+
+jobs:
+  build:
+    runs-on: ubuntu-latest  # Linux build
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up JDK 21
+        uses: actions/setup-java@v3
+        with:
+          distribution: 'temurin'
+          java-version: '21'
+
+      - name: Grant execute permission for Gradle
+        run: chmod +x gradlew
+
+      - name: Build all Linux packages (Deb, Rpm, AppImage)
+        run: ./gradlew packageDistribution
+
+      - name: Upload Linux builds (AppImage, Deb, Rpm)
+        uses: actions/upload-artifact@v4
+        with:
+          name: Linux-Builds
+          path: build/compose/binaries/main/app/*
+
+  windows-build:
+    runs-on: windows-latest  # Windows build
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up JDK 21
+        uses: actions/setup-java@v3
+        with:
+          distribution: 'temurin'
+          java-version: '21'
+
+      - name: Build Windows MSI
+        run: ./gradlew packageDistribution
+
+      - name: Upload Windows build
+        uses: actions/upload-artifact@v4
+        with:
+          name: Windows-Build
+          path: build/compose/binaries/main/msi/*
+
+  macos-build:
+    runs-on: macos-latest  # macOS build
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up JDK 21
+        uses: actions/setup-java@v3
+        with:
+          distribution: 'temurin'
+          java-version: '21'
+
+      - name: Build macOS DMG
+        run: ./gradlew packageDistribution
+
+      - name: Upload macOS build
+        uses: actions/upload-artifact@v4
+        with:
+          name: MacOS-Build
+          path: build/compose/binaries/main/dmg/*
