@@ -73,7 +73,6 @@ fun main() = application {
                     horizontalArrangement = Arrangement.SpaceBetween
                 ) {
                     Text("Ollama", color = Color.White, modifier = Modifier.align(Alignment.CenterVertically))
-
                     Row {
                         Text(
                             "—", color = Color.White, modifier = Modifier
