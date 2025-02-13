@@ -27,7 +27,7 @@ jobs:
         run: chmod +x gradlew
 
       - name: Build all Linux packages (Deb, Rpm, AppImage)
-        run: ./gradlew packageReleaseDistributionForCurrentOS
+        run: ./gradlew packageDistributionForCurrentOS
 
       - name: Upload Linux builds (AppImage, Deb, Rpm)
         uses: actions/upload-artifact@v4
@@ -49,7 +49,7 @@ jobs:
           java-version: '21'
 
       - name: Build Windows MSI
-        run: ./gradlew packageReleaseDistributionForCurrentOS
+        run: ./gradlew packageDistributionForCurrentOS
 
       - name: Upload Windows build
         uses: actions/upload-artifact@v4
@@ -71,7 +71,7 @@ jobs:
           java-version: '21'
 
       - name: Build macOS DMG
-        run: ./gradlew packageReleaseDistributionForCurrentOS
+        run: ./gradlew packageDistributionForCurrentOS
         
       - name: Upload macOS build
         uses: actions/upload-artifact@v4
