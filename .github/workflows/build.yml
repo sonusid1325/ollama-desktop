@@ -89,24 +89,3 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-  ollama-setup:
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
-
-      - name: Install Ollama
-        run: |
-          curl -fsSL https://ollama.ai/install.sh | sh
-
-      - name: Verify Ollama Installation
-        run: ollama --version
-
-      - name: Run Ollama in background
-        run: nohup ollama serve &
-
-      - name: Upload Ollama Logs (for debugging)
-        uses: actions/upload-artifact@v4
-        with:
-          name: Ollama-Logs
-          path: nohup.out
