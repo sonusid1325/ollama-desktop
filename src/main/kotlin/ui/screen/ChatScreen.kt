@@ -53,7 +53,10 @@ fun ChatScreen() {
                     )
                 )
                 Spacer(Modifier.width(10.dp))
-                Button(onClick = {}, contentPadding = PaddingValues(0.dp), modifier = Modifier.size(50.dp)) {
+                Button(onClick = {
+                    messages.add(prompt)
+                    prompt = ""
+                }, contentPadding = PaddingValues(0.dp), modifier = Modifier.size(50.dp)) {
                     Icon(Icons.Rounded.KeyboardArrowRight, "enter")
                 }
             }
@@ -69,8 +72,8 @@ fun ChatScreen() {
             }
         } else {
             LazyColumn(Modifier.padding(paddingValues).padding(16.dp).fillMaxSize()) {
-                items(messages.size) {
-                    index -> ChatBubble(messages[index], index%2==0)
+                items(messages.size) { index ->
+                    ChatBubble(messages[index], index % 2 == 0)
                 }
             }
         }
