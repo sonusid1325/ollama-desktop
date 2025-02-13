@@ -78,3 +78,41 @@ jobs:
         with:
           name: MacOS-Build
           path: build/compose/binaries/main/dmg/*
+
+  release:
+    needs: []
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Download Linux Builds
+        uses: actions/download-artifact@v4
+        with:
+          name: Linux-Builds
+          path: linux/
+
+      - name: Download Windows Builds
+        uses: actions/download-artifact@v4
+        with:
+          name: Windows-Build
+          path: windows/
+
+      - name: Download macOS Builds
+        uses: actions/download-artifact@v4
+        with:
+          name: MacOS-Build
+          path: macos/
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: v1.0.0  # Change this for new versions
+          name: "Ollama v1.0.0"
+          body: "Automated release of Ollama app."
+          draft: false
+          prerelease: false
+          files: |
+            linux/*
+            windows/*
+            macos/*
